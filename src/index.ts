@@ -26,7 +26,9 @@ export { createHttpKernel, STRICT_SECURE_HEADERS } from './kernel';
 export { MiddlewareRegistry } from './middleware/registry';
 export { requestScope } from './middleware/request-scope';
 export { throttle } from './middleware/throttle';
+export { healthRoutes } from './routing/health';
 export { assertNoDuplicateRoutes, listRoutes } from './routing/routes';
+export { runServer } from './server';
 // Grouped conventions: every type in ./types, every constant in ./constants.
 export type {
   ActorResolver,
@@ -37,6 +39,7 @@ export type {
   FieldError,
   FrameworkEnv,
   FrameworkVariables,
+  HealthRoutesOptions,
   HttpKernelOptions,
   MiddlewareDescription,
   MountAuthorization,
@@ -45,4 +48,6 @@ export type {
   ResourcePolicy,
   RouteGuard,
   RouteInfo,
+  RunningServer,
+  RunServerOptions,
 } from './types';

@@ -10,4 +10,6 @@ export type { HttpKernelOptions, KernelCorsOptions } from './kernel';
 export type { MiddlewareDescription } from './middleware/registry';
 export type { ActorResolver, RequestContext } from './middleware/request-scope';
 export type { ThrottleLimiter, ThrottleOptions } from './middleware/throttle';
+export type { HealthRoutesOptions } from './routing/health';
 export type { RouteInfo } from './routing/routes';
+export type { RunningServer, RunServerOptions } from './server';

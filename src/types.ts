@@ -1,5 +1,6 @@
 /** Every interface and type alias of `@framework/http` in one import point. */
 
+export type { AppDefinition, AppModule, DefineAppOptions } from './app';
 export type { MountAuthorization, RouteGuard } from './authorization/guard';
 export type { ResourceAbility, ResourcePolicy } from './authorization/policy';
 export type { PrincipalLike } from './authorization/principal';

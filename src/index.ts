@@ -26,12 +26,16 @@ export { createHttpKernel, STRICT_SECURE_HEADERS } from './kernel';
 export { MiddlewareRegistry } from './middleware/registry';
 export { requestScope } from './middleware/request-scope';
 export { throttle } from './middleware/throttle';
+export { defineApp, defineModule } from './app';
 export { healthRoutes } from './routing/health';
 export { assertNoDuplicateRoutes, listRoutes } from './routing/routes';
 export { runServer } from './server';
 // Grouped conventions: every type in ./types, every constant in ./constants.
 export type {
   ActorResolver,
+  AppDefinition,
+  AppModule,
+  DefineAppOptions,
   ErrorCode,
   ErrorEnvelope,
   ErrorHandlingOptions,

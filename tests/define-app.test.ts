@@ -93,6 +93,26 @@ describe('defineApp', () => {
     expect(await (await http.request('/about')).json()).toEqual({ greeting: 'hello' });
   });
 
+  test('app middleware runs before health, module and app routes', async () => {
+    const http = await serve(
+      defineApp<Config, Operation>({
+        http: () => kernel,
+        middleware: (config) => [
+          async (c, next) => {
+            await next();
+            c.res.headers.set('x-greeting', config.greeting);
+          },
+        ],
+        modules: [statusModule],
+        routes: (root) => void root.get('/about', (c) => c.json({})),
+      }),
+    );
+
+    for (const path of ['/health/live', '/api/v1/status', '/about']) {
+      expect((await http.request(path)).headers.get('x-greeting')).toBe('hello');
+    }
+  });
+
   test('duplicate module names and colliding routes fail clearly', async () => {
     expect(() => defineApp<Config, Operation>({ http: () => kernel, modules: [statusModule, statusModule] })).toThrow(
       /Module "status" is registered twice/,

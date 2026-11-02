@@ -1,5 +1,5 @@
 import { Application, type Container, FrameworkError, type ServiceProvider } from '@framework/core';
-import type { Hono } from 'hono';
+import type { Hono, MiddlewareHandler } from 'hono';
 import type { FrameworkEnv } from './context';
 import { createHttpKernel, type HttpKernelOptions } from './kernel';
 import { type HealthRoutesOptions, healthRoutes } from './routing/health';
@@ -23,8 +23,10 @@ export const defineModule = <TConfig extends object, TOperation = never>(
 ): AppModule<TConfig, TOperation> => module;
 
 export interface DefineAppOptions<TConfig extends object, TOperation = never> {
-  /** Kernel options derived from the validated config. */
-  readonly http: (config: TConfig) => HttpKernelOptions;
+  /** Kernel options derived from the validated config (the application is there for e.g. `resolveActor`). */
+  readonly http: (config: TConfig, application: Application<TConfig>) => HttpKernelOptions;
+  /** Middleware wrapping every route the app mounts (health, modules and app routes), in order. */
+  readonly middleware?: (config: TConfig) => readonly MiddlewareHandler<FrameworkEnv>[];
   /** App-level providers (framework packages, shared infrastructure). */
   readonly providers?: readonly ServiceProvider<TConfig>[];
   readonly modules?: readonly AppModule<TConfig, TOperation>[];
@@ -85,7 +87,9 @@ export function defineApp<TConfig extends object, TOperation = never>(
       return application;
     },
     createHttp(application) {
-      const http = createHttpKernel(application, options.http(application.config));
+      const http = createHttpKernel(application, options.http(application.config, application));
+      const middleware = options.middleware?.(application.config) ?? [];
+      if (middleware.length > 0) http.use(...middleware);
       if (options.health !== false) http.route('/health', healthRoutes(options.health ?? {}));
       for (const module of modules) {
         if (module.routes) http.route(`${apiPrefix}${module.routes.path}`, module.routes.app);

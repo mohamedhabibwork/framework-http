@@ -93,7 +93,28 @@ describe('defineApp', () => {
     expect(await (await http.request('/about')).json()).toEqual({ greeting: 'hello' });
   });
 
-  test('app middleware runs before health, module and app routes', async () => {
+  test('health routes answer even when app middleware fails, and keep the kernel headers', async () => {
+    const http = await serve(
+      defineApp<Config, Operation>({
+        http: () => kernel,
+        middleware: () => [
+          async () => {
+            throw new Error('rate limiter unavailable');
+          },
+        ],
+      }),
+    );
+
+    const live = await http.request('/health/live');
+
+    expect(live.status).toBe(200);
+    expect(await live.json()).toEqual({ status: 'ok' });
+    expect(live.headers.get('x-request-id')).toBeTruthy();
+    expect((await http.request('/health/ready')).status).toBe(200);
+    expect((await http.request('/api/v1/nope')).status).toBe(500);
+  });
+
+  test('app middleware runs before module and app routes, but not health', async () => {
     const http = await serve(
       defineApp<Config, Operation>({
         http: () => kernel,
@@ -108,8 +129,11 @@ describe('defineApp', () => {
       }),
     );
 
-    for (const path of ['/health/live', '/api/v1/status', '/about']) {
+    for (const path of ['/api/v1/status', '/about']) {
       expect((await http.request(path)).headers.get('x-greeting')).toBe('hello');
+    }
+    for (const path of ['/health/live', '/health/ready']) {
+      expect((await http.request(path)).headers.get('x-greeting')).toBeNull();
     }
   });
 

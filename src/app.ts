@@ -25,7 +25,7 @@ export const defineModule = <TConfig extends object, TOperation = never>(
 export interface DefineAppOptions<TConfig extends object, TOperation = never> {
   /** Kernel options derived from the validated config (the application is there for e.g. `resolveActor`). */
   readonly http: (config: TConfig, application: Application<TConfig>) => HttpKernelOptions;
-  /** Middleware wrapping every route the app mounts (health, modules and app routes), in order. */
+  /** Middleware wrapping every route the app mounts except `/health` (modules and app routes), in order. */
   readonly middleware?: (config: TConfig) => readonly MiddlewareHandler<FrameworkEnv>[];
   /** App-level providers (framework packages, shared infrastructure). */
   readonly providers?: readonly ServiceProvider<TConfig>[];
@@ -88,9 +88,10 @@ export function defineApp<TConfig extends object, TOperation = never>(
     },
     createHttp(application) {
       const http = createHttpKernel(application, options.http(application.config, application));
+      // Health goes first: a failing middleware dependency must not fail the probes.
+      if (options.health !== false) http.route('/health', healthRoutes(options.health ?? {}));
       const middleware = options.middleware?.(application.config) ?? [];
       if (middleware.length > 0) http.use(...middleware);
-      if (options.health !== false) http.route('/health', healthRoutes(options.health ?? {}));
       for (const module of modules) {
         if (module.routes) http.route(`${apiPrefix}${module.routes.path}`, module.routes.app);
       }

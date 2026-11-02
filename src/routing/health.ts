@@ -12,7 +12,9 @@ export interface HealthRoutesOptions {
 /**
  * `GET /live` never touches dependencies; `GET /ready` runs every probe
  * concurrently in the request scope and answers 503 when any fails or times
- * out. Mount under a prefix: `.route('/health', healthRoutes({ checks }))`.
+ * out. Mount under a prefix: `.route('/health', healthRoutes({ checks }))`,
+ * ahead of middleware with dependencies (a Redis-backed throttle), or an outage
+ * fails the probes before they can answer.
  */
 export function healthRoutes(options: HealthRoutesOptions = {}) {
   const checks = options.checks ?? [];

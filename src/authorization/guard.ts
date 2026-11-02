@@ -34,7 +34,9 @@ export const authorizationGuard = (authorize: MountAuthorization): MiddlewareHan
   if (authorize.length >= 2) return authorize as MiddlewareHandler<FrameworkEnv>;
   const guard = authorize as RouteGuard;
   return createMiddleware<FrameworkEnv>(async (c, next) => {
-    await guard(c);
+    // A guard that answers instead of throwing has still denied: never fall through.
+    const answer: unknown = await guard(c);
+    if (answer instanceof Response) return answer;
     await next();
   });
 };

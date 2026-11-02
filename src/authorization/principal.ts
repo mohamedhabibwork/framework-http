@@ -1,3 +1,4 @@
+import type { RegisteredUser } from '@framework/core';
 import type { Context } from 'hono';
 import type { FrameworkEnv } from '../context';
 
@@ -10,6 +11,8 @@ import type { FrameworkEnv } from '../context';
 export interface PrincipalLike {
   readonly id: string;
   readonly abilities: readonly string[];
+  /** The identity's user row, typed by `Register.user`; absent for non-user principals. */
+  readonly user?: RegisteredUser;
 }
 
 /** Reads the authenticated principal for the request, or null when anonymous. */

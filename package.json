@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@framework/core": "workspace:*",
-    "hono": "4.13.13"
+    "hono": "4.13.16"
   },
   "devDependencies": {
     "@framework/validation": "workspace:*",
